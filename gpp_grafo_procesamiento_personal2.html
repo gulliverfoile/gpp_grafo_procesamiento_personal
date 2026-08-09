@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPP — Mapa de Percepción Personal</title>
+  <style>
+    /* ===== ESTILOS GLOBALES ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0b1020;
+      color: #e2e8f0;
+      padding: 2rem 1rem;
+      line-height: 1.5;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    /* ===== CABECERA ===== */
+    header { text-align: center; margin-bottom: 2rem; }
+    header h1 { font-size: 2rem; letter-spacing: -0.02em; }
+    header p { color: #94a3b8; margin-top: 0.3rem; }
+
+    /* ===== BRÚJULA INICIAL ===== */
+    #compass {
+      background: #111827;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    #compass h2 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+    #compass p { color: #94a3b8; margin-bottom: 1rem; }
+    .compass-options {
+      display: flex; flex-wrap: wrap; gap: 0.8rem;
+      justify-content: center;
+    }
+    .compass-btn {
+      background: #1f2937;
+      border: 2px solid transparent;
+      border-radius: 40px;
+      padding: 0.6rem 1.4rem;
+      color: #e2e8f0;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .compass-btn:hover { border-color: #475569; transform: scale(1.02); }
+    .compass-btn.selected { border-color: #60a5fa; background: #1e293b; }
+
+    /* ===== CAPAS ===== */
+    .layer-card {
+      background: #111827;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      margin-bottom: 1.2rem;
+      overflow: hidden;
+    }
+    .layer-header {
+      padding: 0.8rem 1.2rem;
+      font-weight: 700;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 1px solid #334155;
+    }
+    .layer-header .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .layer-body {
+      padding: 1rem 1.2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.6rem;
+    }
+    .node-option {
+      display: flex; align-items: flex-start; gap: 0.6rem;
+      background: #1f2937;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 0.6rem 0.8rem;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .node-option:hover { border-color: #475569; }
+    .node-option input { accent-color: #60a5fa; width: 16px; height: 16px; margin-top: 3px; flex-shrink: 0; }
+    .node-label { font-weight: 500; font-size: 0.95rem; }
+    .node-desc { font-size: 0.82rem; color: #94a3b8; margin-top: 0.1rem; }
+
+    /* ===== BOTONES ===== */
+    .actions { display: flex; gap: 0.7rem; margin: 1.5rem 0; }
+    .btn {
+      flex: 1; padding: 0.9rem; border: none; border-radius: 60px;
+      font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-ghost { background: transparent; color: #94a3b8; border: 1px solid #334155; }
+    .btn-ghost:hover { color: #e2e8f0; border-color: #64748b; }
+
+    /* ===== RESULTADOS ===== */
+    #results { display: none; margin-top: 2rem; }
+    .tabs {
+      display: flex; gap: 0.4rem; margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .tab {
+      padding: 0.5rem 1.2rem;
+      border-radius: 999px;
+      border: 1px solid #334155;
+      background: #111827;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .tab.active { background: #1e293b; color: #e2e8f0; border-color: #475569; }
+    .viz {
+      display: none;
+      background: #111827;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 1.2rem;
+    }
+    .viz.active { display: block; }
+
+    /* ===== NARRATIVA ===== */
+    .narrative { line-height: 1.7; font-size: 1.05rem; }
+    .narrative h3 {
+      margin: 1.2rem 0 0.4rem;
+      font-size: 1.1rem;
+      color: #cbd5e1;
+    }
+    .narrative .tag {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin: 0.15rem 0.2rem 0.15rem 0;
+    }
+    .narrative .pattern {
+      background: #1e293b;
+      border-left: 4px solid #facc15;
+      padding: 0.5rem 0.8rem;
+      margin: 0.4rem 0;
+      border-radius: 6px;
+      color: #cbd5e1;
+    }
+
+    /* ===== MAPA DE CALOR (BARRAS) ===== */
+    .heatmap-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .hbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .hbar-label {
+      width: 140px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .hbar-track {
+      flex: 1;
+      height: 24px;
+      background: #1f2937;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+    .hbar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 12px;
+      transition: width 0.4s ease;
+    }
+    .hbar-percent {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      width: 40px;
+      text-align: right;
+    }
+
+    /* ===== GRAFO SVG ===== */
+    .graph-wrap { width: 100%; overflow: auto; text-align: center; }
+    .graph-wrap svg { max-width: 100%; height: auto; }
+    .node-circle { transition: 0.3s; cursor: pointer; }
+    .node-label-svg { font-size: 10px; fill: #cbd5e1; pointer-events: none; text-anchor: middle; }
+    .edge { transition: 0.3s; }
+
+    /* ===== TOOLTIP ===== */
+    .tooltip {
+      position: absolute;
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: #e2e8f0;
+      padding: 0.5rem 0.7rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      pointer-events: none;
+      opacity: 0;
+      transition: 0.15s;
+      z-index: 10;
+      max-width: 260px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 720px) {
+      .layer-body { grid-template-columns: 1fr; }
+      .hbar-label { width: 100px; font-size: 0.8rem; }
+      .compass-options { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🧭 Mapa de Percepción Personal</h1>
+    <p>No eres una etiqueta. Eres un conjunto de formas de procesar el mundo.</p>
+  </header>
+
+  <!-- ===== BRÚJULA INICIAL ===== -->
+  <div id="compass">
+    <h2>🌱 ¿Cuál es tu «modo principal»?</h2>
+    <p>Elige el que más resuene contigo (puedes cambiarlo luego). Te ayudará a empezar.</p>
+    <div class="compass-options">
+      <button class="compass-btn" data-mode="visual">🖼️ Visual – veo imágenes y colores</button>
+      <button class="compass-btn" data-mode="verbal">🗣️ Verbal – pienso con palabras y sonidos</button>
+      <button class="compass-btn" data-mode="kinestesico">🦵 Kinestésico – lo siento en el cuerpo</button>
+      <button class="compass-btn" data-mode="abstracto">🧠 Abstracto – conexiones y conceptos</button>
+    </div>
+  </div>
+
+  <!-- ===== FORMULARIO DE CAPAS ===== -->
+  <form id="gpp-form">
+    <div id="layers-container"></div>
+    <div class="actions">
+      <button type="button" class="btn btn-primary" id="btn-generate">Ver mi mapa →</button>
+      <button type="button" class="btn btn-ghost" id="btn-reset">↺ Empezar de cero</button>
+    </div>
+  </form>
+
+  <!-- ===== RESULTADOS ===== -->
+  <div id="results">
+    <div class="tabs">
+      <button class="tab active" data-viz="text">📖 Narrativa</button>
+      <button class="tab" data-viz="heatmap">📊 Mapa de calor</button>
+      <button class="tab" data-viz="graph">🌀 Grafo de red</button>
+    </div>
+
+    <div class="viz active" id="viz-text"><div class="narrative" id="narrative-box"></div></div>
+    <div class="viz" id="viz-heatmap"><div id="heatmap-box"></div></div>
+    <div class="viz" id="viz-graph"><div class="graph-wrap" id="graph-box"></div></div>
+  </div>
+</div>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+/* ================================================================
+   GPP — Mapa de Percepción Personal
+   v2.0 – Arquitectura reactiva, preguntas con ejemplos cotidianos
+   ================================================================ */
+
+// ================================================================
+// 1. CONFIGURACIÓN (nuevas preguntas con ejemplos)
+// ================================================================
+const LAYERS = [
+  {
+    id: 'ingesta',
+    label: '¿Cómo te entra la información?',
+    color: '#ff6b6b',
+    hex: '#ff6b6b',
+    nodes: [
+      { id: 'visual_dom', label: 'Visual', desc: 'Cuando recuerdas algo, ves la imagen con colores y detalles. Como una foto mental.' },
+      { id: 'auditivo_dom', label: 'Auditivo', desc: 'Si te dan un número, lo «oyes» en tu cabeza antes de repetirlo. Las palabras tienen ritmo.' },
+      { id: 'propioceptivo', label: 'Corporal', desc: 'Sientes dónde está tu brazo sin mirar. Sabes el peso de tu cuerpo al sentarte.' },
+      { id: 'interoceptivo', label: 'Señales internas', desc: 'Notas el estómago tenso antes de hablar en público, o el café acelerándote el corazón.' },
+      { id: 'hipo_ingesta', label: 'Filtro grueso', desc: 'Necesitas que las cosas sean muy intensas para que te llamen la atención. Lo suave pasa de largo.' },
+      { id: 'hiper_ingesta', label: 'Radar fino', desc: 'Entras a una cafetería y en dos segundos sabes cuántas mesas, qué música y qué lleva el de la barra.' },
+      { id: 'filtrado_sel', label: 'Selector activo', desc: 'Puedes ignorar el ruido de fondo y concentrarte en una sola conversación, sin esfuerzo.' },
+      { id: 'inundacion_cross', label: 'Sentidos mezclados', desc: 'Cuando oyes una canción, ves colores o formas. O al tocar algo, te viene un sonido a la cabeza.' }
+    ]
+  },
+  {
+    id: 'procesamiento',
+    label: '¿Cómo le das vueltas?',
+    color: '#feca57',
+    hex: '#feca57',
+    nodes: [
+      { id: 'secuencial', label: 'Paso a paso', desc: 'Piensas en orden: A lleva a B, y luego a C. Saltarte un paso te descoloca.' },
+      { id: 'rizomatico', label: 'Saltos de conejo', desc: 'Empiezas pensando en qué cenar y acabas planeando un viaje a Japón. Las conexiones fluyen solas.' },
+      { id: 'verbal_dom', label: 'Diálogo interno', desc: 'Tu mente habla constantemente. Es como una radio que no se apaga.' },
+      { id: 'no_verbal', label: 'Corazonadas', desc: 'Tienes una sensación o un «saber» que no viene en palabras, sino en bloque.' },
+      { id: 'abstracto', label: 'Conceptos puros', desc: 'Te pierdes en ideas, teorías y relaciones entre cosas que no están físicamente presentes.' },
+      { id: 'concreto', label: 'Ejemplos vivos', desc: 'Prefieres pensar con casos reales: «como aquella vez que...» o «por ejemplo...»' },
+      { id: 'flash_asoc', label: 'Chispazos', desc: 'De repente te viene una idea genial sin saber de dónde. Como un destello.' },
+      { id: 'persistencia', label: 'Tenacidad', desc: 'Cuando algo te engancha, no puedes soltarlo hasta que lo terminas. Como un pitillo mental.' }
+    ]
+  },
+  {
+    id: 'analisis',
+    label: '¿Qué haces después de actuar?',
+    color: '#48dbfb',
+    hex: '#48dbfb',
+    nodes: [
+      { id: 'meta_continua', label: 'Observador interno', desc: 'Mientras haces algo, hay una vocecita que comenta: «esto está bien», «esto no».' },
+      { id: 'analisis_post', label: 'Revisión tardía', desc: 'En el momento actúas, pero a las 2 de la mañana te das cuenta de lo que deberías haber dicho.' },
+      { id: 'intelectualizacion', label: 'Traductor de emociones', desc: 'Cuando sientes algo fuerte, lo conviertes en explicaciones: «esto es porque...»' },
+      { id: 'experienciacion', label: 'Sentir sin etiquetas', desc: 'Vives la emoción tal cual, sin ponerle nombre ni analizarla.' },
+      { id: 'simulacion_soc', label: 'Repetir conversaciones', desc: 'Rebobinas mentalmente lo que dijiste y lo que podría haber pasado si hubieras dicho otra cosa.' },
+      { id: 'anticipacion', label: 'Planificador mental', desc: 'Antes de hacer algo, lo ensayas en tu cabeza varias veces para prepararte.' },
+      { id: 'revision_comp', label: 'Bucle de cinta', desc: 'Le das vueltas a lo que pasó, una y otra vez, como si pudieras cambiarlo.' }
+    ]
+  },
+  {
+    id: 'accion',
+    label: '¿Cómo actúas y te recuperas?',
+    color: '#1dd1a1',
+    hex: '#1dd1a1',
+    nodes: [
+      { id: 'espontaneidad_ctx', label: 'Espontáneo a ratos', desc: 'En casa eres un torbellino, pero en el trabajo te controlas. Depende del entorno.' },
+      { id: 'calculo_adapt', label: 'Camaleón social', desc: 'Ajustas tu comportamiento según quién tengas delante. Como cambiar de canal.' },
+      { id: 'reg_motora', label: 'Precisión física', desc: 'Tienes un control fino de tus movimientos: escribes, dibujas o tocas instrumentos con detalle.' },
+      { id: 'descarga_motora', label: 'Movimiento liberador', desc: 'Cuando estás nervioso, necesitas moverte, caminar o hacer algo con las manos.' },
+      { id: 'recup_post_soc', label: 'Cueva después de la gente', desc: 'Después de una fiesta, necesitas estar solo, sin ruido, para cargar pilas.' },
+      { id: 'recup_post_cog', label: 'Siesta mental', desc: 'Después de estudiar o pensar mucho, necesitas un descanso total para ordenar ideas.' },
+      { id: 'exp_directa', label: 'Directo al grano', desc: 'Dices lo que piensas sin rodeos. No hay dobles intenciones.' },
+      { id: 'mascaramiento_ent', label: 'Personaje según el lugar', desc: 'Tu personalidad cambia drásticamente según estés en el trabajo, en casa o con amigos.' }
+    ]
+  },
+  {
+    id: 'sistemica',
+    label: '¿Cómo te relacionas con los demás?',
+    color: '#a29bfe',
+    hex: '#a29bfe',
+    nodes: [
+      { id: 'deteccion_incons', label: 'Detector de incoherencias', desc: 'Notas al instante cuando alguien dice una cosa y hace otra, o cuando una norma no se cumple.' },
+      { id: 'extraccion_perc', label: 'Radar de ambiente', desc: 'Entras a una habitación y notas el «ambiente tenso» sin que te lo digan. Lo sientes en el cuerpo.' },
+      { id: 'alineacion_fluida', label: 'Integración natural', desc: 'Te adaptas a las normas del grupo sin esfuerzo, como si hubieras estado siempre ahí.' },
+      { id: 'resistencia_est', label: 'Fricción con el sistema', desc: 'Cuando una norma te parece injusta, te cuesta seguirla. Te plantas.' },
+      { id: 'empatia_visceral', label: 'Empatía corporal', desc: 'Si el otro está triste, sientes un nudo en el estómago. Lo vives en tus carnes.' },
+      { id: 'lectura_mec', label: 'Entender por patrones', desc: 'Analizas a la gente como si fuera un mecanismo: «si hace A, significa B».' }
+    ]
+  }
+];
+
+// Aristas teóricas (conexiones típicas entre nodos)
+const EDGES = [
+  { from: 'hiper_ingesta', to: 'inundacion_cross', type: 'intra' },
+  { from: 'propioceptivo', to: 'descarga_motora', type: 'inter' },
+  { from: 'visual_dom', to: 'abstracto', type: 'inter' },
+  { from: 'auditivo_dom', to: 'verbal_dom', type: 'inter' },
+  { from: 'no_verbal', to: 'experienciacion', type: 'inter' },
+  { from: 'flash_asoc', to: 'rizomatico', type: 'intra' },
+  { from: 'flash_asoc', to: 'recup_post_cog', type: 'inter' },
+  { from: 'meta_continua', to: 'revision_comp', type: 'intra' },
+  { from: 'analisis_post', to: 'espontaneidad_ctx', type: 'inter' },
+  { from: 'intelectualizacion', to: 'calculo_adapt', type: 'inter' },
+  { from: 'exp_directa', to: 'resistencia_est', type: 'inter' },
+  { from: 'deteccion_incons', to: 'resistencia_est', type: 'intra' },
+  { from: 'empatia_visceral', to: 'experienciacion', type: 'inter' },
+  { from: 'lectura_mec', to: 'calculo_adapt', type: 'inter' }
+];
+
+// ================================================================
+// 2. DOMINIO (entidad Profile)
+// ================================================================
+class Profile {
+  constructor(activeIds = []) {
+    this._active = new Set(activeIds);
+  }
+  toggle(id) {
+    const next = new Set(this._active);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return new Profile(next);
+  }
+  isActive(id) { return this._active.has(id); }
+  get all() { return Array.from(this._active); }
+  get size() { return this._active.size; }
+  // Serialización
+  toJSON() { return this.all; }
+  static fromJSON(arr) { return new Profile(arr || []); }
+}
+
+// ================================================================
+// 3. EVENT BUS (simple pub/sub)
+// ================================================================
+class EventBus {
+  constructor() { this._listeners = new Map(); }
+  subscribe(event, handler) {
+    if (!this._listeners.has(event)) this._listeners.set(event, []);
+    this._listeners.get(event).push(handler);
+    return () => { this._listeners.set(event, this._listeners.get(event).filter(h => h !== handler)); };
+  }
+  publish(event, data) {
+    (this._listeners.get(event) || []).forEach(h => { try { h(data); } catch (e) { console.warn(e); } });
+  }
+}
+
+const bus = new EventBus();
+
+// ================================================================
+// 4. PERSISTENCIA (localStorage)
+// ================================================================
+const STORAGE_KEY = 'gpp_profile_v2';
+function loadProfile() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return Profile.fromJSON(raw ? JSON.parse(raw) : []);
+  } catch { return new Profile(); }
+}
+function saveProfile(profile) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(profile.toJSON())); } catch {}
+}
+
+// ================================================================
+// 5. LÓGICA DE LA BRÚJULA (pre-selección)
+// ================================================================
+const COMPASS_PRESETS = {
+  visual: ['visual_dom', 'abstracto', 'flash_asoc'],
+  verbal: ['auditivo_dom', 'verbal_dom', 'simulacion_soc'],
+  kinestesico: ['propioceptivo', 'descarga_motora', 'experienciacion'],
+  abstracto: ['rizomatico', 'meta_continua', 'anticipacion']
+};
+
+// ================================================================
+// 6. UI: RENDERIZADO DE CHECKBOXES
+// ================================================================
+const layersContainer = document.getElementById('layers-container');
+
+function renderCheckboxes(profile) {
+  layersContainer.innerHTML = '';
+  LAYERS.forEach(layer => {
+    const card = document.createElement('div');
+    card.className = 'layer-card';
+    card.innerHTML = `
+      <div class="layer-header" style="color:${layer.color}">
+        <span class="dot" style="background:${layer.color}"></span>
+        ${layer.label}
+      </div>
+      <div class="layer-body" data-layer="${layer.id}"></div>
+    `;
+    const body = card.querySelector('.layer-body');
+    layer.nodes.forEach(node => {
+      const label = document.createElement('label');
+      label.className = 'node-option';
+      label.innerHTML = `
+        <input type="checkbox" value="${node.id}" ${profile.isActive(node.id) ? 'checked' : ''}>
+        <div>
+          <div class="node-label">${node.label}</div>
+          <div class="node-desc">${node.desc}</div>
+        </div>
+      `;
+      const input = label.querySelector('input');
+      input.addEventListener('change', () => {
+        const newProfile = profile.toggle(node.id);
+        saveProfile(newProfile);
+        bus.publish('PROFILE_CHANGED', newProfile);
+        // actualizar el estado interno de la vista para futuros toggles
+        profile = newProfile;
+        // sincronizar el resto de checkboxes (por si algún otro cambió)
+        syncCheckboxes(profile);
+      });
+      body.appendChild(label);
+    });
+    layersContainer.appendChild(card);
+  });
+}
+
+function syncCheckboxes(profile) {
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.checked = profile.isActive(cb.value);
+  });
+}
+
+// ================================================================
+// 7. RENDERIZADORES
+// ================================================================
+
+// 7.1 Narrativa (texto en segunda persona)
+const narrativeBox = document.getElementById('narrative-box');
+function renderNarrative(profile) {
+  if (profile.size === 0) {
+    narrativeBox.innerHTML = `<p style="color:#64748b; font-style:italic;">Marca al menos un nodo para ver tu perfil.</p>`;
+    return;
+  }
+  let html = `<p style="margin-bottom:1rem; color:#94a3b8;">Tu mapa tiene <strong>${profile.size}</strong> mecanismos activos.</p>`;
+
+  // Recorrer capas
+  LAYERS.forEach(layer => {
+    const active = layer.nodes.filter(n => profile.isActive(n.id));
+    if (active.length === 0) return;
+    html += `<h3 style="color:${layer.color}">${layer.label}</h3><p>`;
+    active.forEach(n => {
+      html += `<span class="tag" style="background:${layer.color}22; color:${layer.color}; border:1px solid ${layer.color}44;">${n.label}</span>`;
+    });
+    html += `</p>`;
+  });
+
+  // Patrones (sugerencias en lenguaje natural)
+  const patterns = detectPatterns(profile);
+  if (patterns.length) {
+    html += `<h3 style="color:#cbd5e1; margin-top:1.2rem;">🔍 Observaciones sobre tu mapa</h3>`;
+    patterns.forEach(p => {
+      html += `<div class="pattern">${p}</div>`;
+    });
+  }
+
+  narrativeBox.innerHTML = html;
+}
+
+// Detección de patrones con frases humanas
+function detectPatterns(profile) {
+  const has = id => profile.isActive(id);
+  const patterns = [];
+  if (has('analisis_post') && has('espontaneidad_ctx'))
+    patterns.push('Actúas en el momento y reflexionas después. Como un jazzista que improvisa y luego analiza la partitura.');
+  if (has('hiper_ingesta') && has('recup_post_cog'))
+    patterns.push('Captas mucha información y necesitas tiempo a solas para procesarla. Eres como un radar con su propia siesta.');
+  if (has('meta_continua') && has('revision_comp'))
+    patterns.push('Tienes un observador interno que no para de comentar y revisar. Como un crítico de cine dentro de tu cabeza.');
+  if (has('deteccion_incons') && has('resistencia_est'))
+    patterns.push('Detectas incoherencias y te cuesta seguir normas que no encajan. Tienes un sensor de justicia muy fino.');
+  if (has('no_verbal') && has('experienciacion') && !has('verbal_dom'))
+    patterns.push('Sientes y experimentas antes de ponerlo en palabras. Tu mundo interior es más una sinfonía que un discurso.');
+  if (has('flash_asoc') && has('rizomatico') && has('recup_post_cog'))
+    patterns.push('Tu mente salta de idea en idea, pero luego necesitas un respiro. Eres un fuego artificial que necesita su pausa.');
+  if (has('empatia_visceral') && has('interoceptivo'))
+    patterns.push('Sientes las emociones de los demás en tu propio cuerpo. Tu empatía es física, no solo mental.');
+  return patterns;
+}
+
+// 7.2 Mapa de calor (barras horizontales)
+const heatmapBox = document.getElementById('heatmap-box');
+function renderHeatmap(profile) {
+  let html = `<div class="heatmap-bars">`;
+  LAYERS.forEach(layer => {
+    const active = layer.nodes.filter(n => profile.isActive(n.id)).length;
+    const total = layer.nodes.length;
+    const percent = total ? (active / total) * 100 : 0;
+    html += `
+      <div class="hbar">
+        <div class="hbar-label" style="color:${layer.color}">${layer.label}</div>
+        <div class="hbar-track">
+          <div class="hbar-fill" style="width:${percent}%; background:${layer.color};"></div>
+        </div>
+        <div class="hbar-percent">${Math.round(percent)}%</div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+  heatmapBox.innerHTML = html;
+}
+
+// 7.3 Grafo (SVG con anillos concéntricos mejorados)
+const graphBox = document.getElementById('graph-box');
+const tooltip = document.getElementById('tooltip');
+
+function renderGraph(profile) {
+  const size = 800;
+  const cx = size / 2, cy = size / 2;
+  const radii = { ingesta: 100, procesamiento: 190, analisis: 280, accion: 370, sistemica: 460 };
+
+  // Posicionar nodos
+  const positions = {};
+  LAYERS.forEach(layer => {
+    const r = radii[layer.id];
+    const offset = (layer.id === 'procesamiento' || layer.id === 'accion') ? Math.PI / layer.nodes.length : 0;
+    layer.nodes.forEach((node, i) => {
+      const angle = (i / layer.nodes.length) * 2 * Math.PI + offset - Math.PI / 2;
+      positions[node.id] = {
+        x: cx + r * Math.cos(angle),
+        y: cy + r * Math.sin(angle),
+        color: layer.hex,
+        label: node.label,
+        desc: node.desc
+      };
+    });
+  });
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+  svg.setAttribute('width', size);
+  svg.setAttribute('height', size);
+  svg.style.maxWidth = '100%';
+
+  // Anillos de fondo
+  Object.values(radii).forEach(r => {
+    const circle = document.createElementNS(ns, 'circle');
+    circle.setAttribute('cx', cx); circle.setAttribute('cy', cy); circle.setAttribute('r', r);
+    circle.setAttribute('fill', 'none');
+    circle.setAttribute('stroke', '#1e2937');
+    circle.setAttribute('stroke-width', '1');
+    svg.appendChild(circle);
+  });
+
+  // Aristas teóricas (siempre dibujadas, se iluminan si ambos activos)
+  EDGES.forEach(edge => {
+    const a = positions[edge.from], b = positions[edge.to];
+    if (!a || !b) return;
+    const active = profile.isActive(edge.from) && profile.isActive(edge.to);
+    const line = document.createElementNS(ns, 'line');
+    line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+    line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+    line.setAttribute('class', 'edge');
+    line.setAttribute('stroke', active ? '#94a3b8' : '#1e2937');
+    line.setAttribute('stroke-width', active ? 2 : 1);
+    line.setAttribute('opacity', active ? 0.9 : 0.25);
+    svg.appendChild(line);
+  });
+
+  // Aristas de flujo entre capas adyacentes (solo si ambos activos)
+  for (let i = 0; i < LAYERS.length - 1; i++) {
+    const curr = LAYERS[i], next = LAYERS[i+1];
+    curr.nodes.forEach(na => {
+      if (!profile.isActive(na.id)) return;
+      next.nodes.forEach(nb => {
+        if (!profile.isActive(nb.id)) return;
+        const a = positions[na.id], b = positions[nb.id];
+        if (!a || !b) return;
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+        line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+        line.setAttribute('stroke', curr.color);
+        line.setAttribute('stroke-width', 1.5);
+        line.setAttribute('opacity', 0.3);
+        line.setAttribute('stroke-dasharray', '4 4');
+        svg.appendChild(line);
+      });
+    });
+  }
+
+  // Nodos
+  Object.entries(positions).forEach(([id, pos]) => {
+    const active = profile.isActive(id);
+    const g = document.createElementNS(ns, 'g');
+    g.style.cursor = 'pointer';
+
+    const circle = document.createElementNS(ns, 'circle');
+    circle.setAttribute('cx', pos.x); circle.setAttribute('cy', pos.y);
+    circle.setAttribute('r', active ? 10 : 6);
+    circle.setAttribute('fill', active ? pos.color : '#1e2937');
+    circle.setAttribute('stroke', active ? '#fff' : '#334155');
+    circle.setAttribute('stroke-width', active ? 2 : 1);
+    circle.setAttribute('class', 'node-circle');
+    if (active) circle.style.filter = `drop-shadow(0 0 8px ${pos.color})`;
+
+    const text = document.createElementNS(ns, 'text');
+    text.setAttribute('x', pos.x); text.setAttribute('y', pos.y + 22);
+    text.setAttribute('class', 'node-label-svg');
+    text.textContent = pos.label;
+
+    g.appendChild(circle);
+    g.appendChild(text);
+
+    // Tooltip
+    g.addEventListener('mouseenter', (e) => {
+      tooltip.innerHTML = `<strong>${pos.label}</strong> ${active ? '✅ activo' : ''}<br><span style="color:#94a3b8; font-size:0.8rem;">${pos.desc}</span>`;
+      tooltip.style.opacity = 1;
+      tooltip.style.left = (e.pageX + 12) + 'px';
+      tooltip.style.top = (e.pageY + 12) + 'px';
+    });
+    g.addEventListener('mousemove', (e) => {
+      tooltip.style.left = (e.pageX + 12) + 'px';
+      tooltip.style.top = (e.pageY + 12) + 'px';
+    });
+    g.addEventListener('mouseleave', () => { tooltip.style.opacity = 0; });
+
+    svg.appendChild(g);
+  });
+
+  graphBox.innerHTML = '';
+  graphBox.appendChild(svg);
+}
+
+// ================================================================
+// 8. ACTUALIZACIÓN GLOBAL (cuando cambia el perfil)
+// ================================================================
+function updateAll(profile) {
+  renderNarrative(profile);
+  renderHeatmap(profile);
+  renderGraph(profile);
+  // Sincronizar checkboxes (por si hubo cambios externos)
+  syncCheckboxes(profile);
+}
+
+// ================================================================
+// 9. INICIO Y SUSCRIPCIONES
+// ================================================================
+
+// Cargar perfil inicial
+let currentProfile = loadProfile();
+
+// Renderizar checkboxes
+renderCheckboxes(currentProfile);
+
+// Suscribirse a cambios
+bus.subscribe('PROFILE_CHANGED', (newProfile) => {
+  currentProfile = newProfile;
+  updateAll(currentProfile);
+  // Guardar ya se hizo en el evento del checkbox
+});
+
+// Render inicial
+updateAll(currentProfile);
+
+// ================================================================
+// 10. BRÚJULA (pre-selección)
+// ================================================================
+const compassBtns = document.querySelectorAll('.compass-btn');
+compassBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.dataset.mode;
+    const ids = COMPASS_PRESETS[mode] || [];
+    if (!ids.length) return;
+    // Añadir esos nodos al perfil actual (sin perder los que ya tenía)
+    let newProfile = currentProfile;
+    ids.forEach(id => {
+      if (!newProfile.isActive(id)) {
+        newProfile = newProfile.toggle(id);
+      }
+    });
+    // Guardar y publicar
+    saveProfile(newProfile);
+    bus.publish('PROFILE_CHANGED', newProfile);
+    // Marcar botón como seleccionado (feedback visual)
+    compassBtns.forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    // Opcional: ocultar brújula después de elegir
+    // document.getElementById('compass').style.display = 'none';
+  });
+});
+
+// ================================================================
+// 11. BOTONES DE ACCIÓN
+// ================================================================
+const btnGenerate = document.getElementById('btn-generate');
+const resultsDiv = document.getElementById('results');
+btnGenerate.addEventListener('click', () => {
+  resultsDiv.style.display = 'block';
+  resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+const btnReset = document.getElementById('btn-reset');
+btnReset.addEventListener('click', () => {
+  const empty = new Profile();
+  saveProfile(empty);
+  bus.publish('PROFILE_CHANGED', empty);
+  resultsDiv.style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Desmarcar brújula
+  compassBtns.forEach(b => b.classList.remove('selected'));
+});
+
+// ================================================================
+// 12. TABS
+// ================================================================
+const tabs = document.querySelectorAll('.tab');
+const vizzes = document.querySelectorAll('.viz');
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const id = tab.dataset.viz;
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.viz === id));
+    vizzes.forEach(v => v.classList.toggle('active', v.id === 'viz-' + id));
+  });
+});
+
+// ================================================================
+// 13. TOOLTIP GLOBAL (se mueve con el ratón)
+// ================================================================
+document.addEventListener('mousemove', (e) => {
+  if (tooltip.style.opacity === '1') {
+    tooltip.style.left = (e.pageX + 12) + 'px';
+    tooltip.style.top = (e.pageY + 12) + 'px';
+  }
+});
+
+console.log('🧭 Mapa de Percepción Personal v2.0 cargado.');
+</script>
+</body>
+</html>
