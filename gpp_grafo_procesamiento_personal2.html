@@ -14,9 +14,8 @@
       padding: 2rem 1rem;
       line-height: 1.5;
     }
-    .container { max-width: 1100px; margin: 0 auto; }
+    .container { max-width: 1200px; margin: 0 auto; }
 
-    /* ===== CABECERA ===== */
     header { text-align: center; margin-bottom: 2rem; }
     header h1 { font-size: 2rem; letter-spacing: -0.02em; }
     header p { color: #94a3b8; margin-top: 0.3rem; }
@@ -48,6 +47,7 @@
     }
     .compass-btn:hover { border-color: #475569; transform: scale(1.02); }
     .compass-btn.selected { border-color: #60a5fa; background: #1e293b; }
+    .compass-btn[aria-pressed="true"] { border-color: #60a5fa; background: #1e293b; }
 
     /* ===== CAPAS ===== */
     .layer-card {
@@ -70,33 +70,55 @@
     .layer-body {
       padding: 1rem 1.2rem;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 0.6rem;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 0.8rem;
     }
     .node-option {
-      display: flex; align-items: flex-start; gap: 0.6rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
       background: #1f2937;
       border: 1px solid transparent;
       border-radius: 10px;
-      padding: 0.6rem 0.8rem;
-      cursor: pointer;
+      padding: 0.8rem;
       transition: 0.15s;
     }
     .node-option:hover { border-color: #475569; }
-    .node-option input { accent-color: #60a5fa; width: 16px; height: 16px; margin-top: 3px; flex-shrink: 0; }
-    .node-label { font-weight: 500; font-size: 0.95rem; }
+    .node-label { font-weight: 600; font-size: 0.95rem; }
     .node-desc { font-size: 0.82rem; color: #94a3b8; margin-top: 0.1rem; }
+    .intensity-scale {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .intensity-scale label {
+      display: flex; align-items: center; gap: 0.2rem;
+      font-size: 0.75rem;
+      color: #cbd5e1;
+      cursor: pointer;
+    }
+    .intensity-scale input[type="radio"] {
+      accent-color: #60a5fa;
+      width: 14px; height: 14px;
+    }
+    .intensity-scale label span { font-size: 0.7rem; }
 
     /* ===== BOTONES ===== */
-    .actions { display: flex; gap: 0.7rem; margin: 1.5rem 0; }
+    .actions { display: flex; gap: 0.7rem; margin: 1.5rem 0; flex-wrap: wrap; }
     .btn {
       flex: 1; padding: 0.9rem; border: none; border-radius: 60px;
       font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+      min-width: 140px;
     }
     .btn-primary { background: #2563eb; color: #fff; }
     .btn-primary:hover { background: #1d4ed8; }
     .btn-ghost { background: transparent; color: #94a3b8; border: 1px solid #334155; }
     .btn-ghost:hover { color: #e2e8f0; border-color: #64748b; }
+    .btn-outline {
+      background: transparent;
+      color: #60a5fa;
+      border: 1px solid #60a5fa;
+    }
+    .btn-outline:hover { background: #1e293b; }
 
     /* ===== RESULTADOS ===== */
     #results { display: none; margin-top: 2rem; }
@@ -112,8 +134,13 @@
       color: #94a3b8;
       cursor: pointer;
       font-size: 0.9rem;
+      transition: 0.2s;
     }
-    .tab.active { background: #1e293b; color: #e2e8f0; border-color: #475569; }
+    .tab.active, .tab[aria-selected="true"] {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-color: #475569;
+    }
     .viz {
       display: none;
       background: #111827;
@@ -146,47 +173,31 @@
       border-radius: 6px;
       color: #cbd5e1;
     }
-
-    /* ===== MAPA DE CALOR (BARRAS) ===== */
-    .heatmap-bars {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+    .dominance-list {
+      list-style: none;
+      padding: 0;
     }
-    .hbar {
+    .dominance-list li {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 1rem;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid #1e293b;
     }
-    .hbar-label {
-      width: 140px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      text-align: right;
-      flex-shrink: 0;
-    }
-    .hbar-track {
-      flex: 1;
-      height: 24px;
-      background: #1f2937;
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-    }
-    .hbar-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 12px;
-      transition: width 0.4s ease;
-    }
-    .hbar-percent {
-      font-size: 0.85rem;
+    .dominance-list .node-name { font-weight: 500; }
+    .dominance-list .intensity-badge {
+      background: #1e293b;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
       color: #94a3b8;
-      width: 40px;
-      text-align: right;
     }
 
-    /* ===== GRAFO SVG ===== */
+    /* ===== RADAR ===== */
+    .radar-wrap { width: 100%; overflow: auto; text-align: center; }
+    .radar-wrap svg { max-width: 100%; height: auto; }
+
+    /* ===== GRAFO ===== */
     .graph-wrap { width: 100%; overflow: auto; text-align: center; }
     .graph-wrap svg { max-width: 100%; height: auto; }
     .node-circle { transition: 0.3s; cursor: pointer; }
@@ -212,8 +223,8 @@
     /* ===== RESPONSIVE ===== */
     @media (max-width: 720px) {
       .layer-body { grid-template-columns: 1fr; }
-      .hbar-label { width: 100px; font-size: 0.8rem; }
       .compass-options { flex-direction: column; align-items: center; }
+      .actions { flex-direction: column; }
     }
   </style>
 </head>
@@ -225,14 +236,14 @@
   </header>
 
   <!-- ===== BRÚJULA INICIAL ===== -->
-  <div id="compass">
-    <h2>🌱 ¿Cuál es tu «modo principal»?</h2>
+  <div id="compass" role="group" aria-labelledby="compass-title">
+    <h2 id="compass-title">🌱 ¿Cuál es tu «modo principal»?</h2>
     <p>Elige el que más resuene contigo (puedes cambiarlo luego). Te ayudará a empezar.</p>
     <div class="compass-options">
-      <button class="compass-btn" data-mode="visual">🖼️ Visual – veo imágenes y colores</button>
-      <button class="compass-btn" data-mode="verbal">🗣️ Verbal – pienso con palabras y sonidos</button>
-      <button class="compass-btn" data-mode="kinestesico">🦵 Kinestésico – lo siento en el cuerpo</button>
-      <button class="compass-btn" data-mode="abstracto">🧠 Abstracto – conexiones y conceptos</button>
+      <button class="compass-btn" data-mode="visual" aria-pressed="false">🖼️ Visual – veo imágenes y colores</button>
+      <button class="compass-btn" data-mode="verbal" aria-pressed="false">🗣️ Verbal – pienso con palabras y sonidos</button>
+      <button class="compass-btn" data-mode="kinestesico" aria-pressed="false">🦵 Kinestésico – lo siento en el cuerpo</button>
+      <button class="compass-btn" data-mode="abstracto" aria-pressed="false">🧠 Abstracto – conexiones y conceptos</button>
     </div>
   </div>
 
@@ -242,20 +253,27 @@
     <div class="actions">
       <button type="button" class="btn btn-primary" id="btn-generate">Ver mi mapa →</button>
       <button type="button" class="btn btn-ghost" id="btn-reset">↺ Empezar de cero</button>
+      <button type="button" class="btn btn-outline" id="btn-export">💾 Exportar perfil</button>
     </div>
   </form>
 
   <!-- ===== RESULTADOS ===== -->
   <div id="results">
-    <div class="tabs">
-      <button class="tab active" data-viz="text">📖 Narrativa</button>
-      <button class="tab" data-viz="heatmap">📊 Mapa de calor</button>
-      <button class="tab" data-viz="graph">🌀 Grafo de red</button>
+    <div class="tabs" role="tablist" aria-label="Vistas del mapa">
+      <button class="tab active" data-viz="text" role="tab" aria-selected="true" aria-controls="viz-text">📖 Narrativa</button>
+      <button class="tab" data-viz="radar" role="tab" aria-selected="false" aria-controls="viz-radar">📊 Radar</button>
+      <button class="tab" data-viz="graph" role="tab" aria-selected="false" aria-controls="viz-graph">🌀 Grafo de red</button>
     </div>
 
-    <div class="viz active" id="viz-text"><div class="narrative" id="narrative-box"></div></div>
-    <div class="viz" id="viz-heatmap"><div id="heatmap-box"></div></div>
-    <div class="viz" id="viz-graph"><div class="graph-wrap" id="graph-box"></div></div>
+    <div class="viz active" id="viz-text" role="tabpanel" aria-labelledby="tab-text">
+      <div class="narrative" id="narrative-box"></div>
+    </div>
+    <div class="viz" id="viz-radar" role="tabpanel" aria-labelledby="tab-radar">
+      <div class="radar-wrap" id="radar-box"></div>
+    </div>
+    <div class="viz" id="viz-graph" role="tabpanel" aria-labelledby="tab-graph">
+      <div class="graph-wrap" id="graph-box"></div>
+    </div>
   </div>
 </div>
 <div class="tooltip" id="tooltip"></div>
@@ -263,11 +281,11 @@
 <script>
 /* ================================================================
    GPP — Mapa de Percepción Personal
-   v2.0 – Arquitectura reactiva, preguntas con ejemplos cotidianos
+   v3.0 – Arquitectura modular, Store central, Intensidades, Radar, Exportación
    ================================================================ */
 
 // ================================================================
-// 1. CONFIGURACIÓN (nuevas preguntas con ejemplos)
+// 1. CONFIGURACIÓN (datos estáticos)
 // ================================================================
 const LAYERS = [
   {
@@ -367,73 +385,180 @@ const EDGES = [
   { from: 'lectura_mec', to: 'calculo_adapt', type: 'inter' }
 ];
 
-// ================================================================
-// 2. DOMINIO (entidad Profile)
-// ================================================================
-class Profile {
-  constructor(activeIds = []) {
-    this._active = new Set(activeIds);
-  }
-  toggle(id) {
-    const next = new Set(this._active);
-    if (next.has(id)) next.delete(id); else next.add(id);
-    return new Profile(next);
-  }
-  isActive(id) { return this._active.has(id); }
-  get all() { return Array.from(this._active); }
-  get size() { return this._active.size; }
-  // Serialización
-  toJSON() { return this.all; }
-  static fromJSON(arr) { return new Profile(arr || []); }
-}
-
-// ================================================================
-// 3. EVENT BUS (simple pub/sub)
-// ================================================================
-class EventBus {
-  constructor() { this._listeners = new Map(); }
-  subscribe(event, handler) {
-    if (!this._listeners.has(event)) this._listeners.set(event, []);
-    this._listeners.get(event).push(handler);
-    return () => { this._listeners.set(event, this._listeners.get(event).filter(h => h !== handler)); };
-  }
-  publish(event, data) {
-    (this._listeners.get(event) || []).forEach(h => { try { h(data); } catch (e) { console.warn(e); } });
-  }
-}
-
-const bus = new EventBus();
-
-// ================================================================
-// 4. PERSISTENCIA (localStorage)
-// ================================================================
-const STORAGE_KEY = 'gpp_profile_v2';
-function loadProfile() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return Profile.fromJSON(raw ? JSON.parse(raw) : []);
-  } catch { return new Profile(); }
-}
-function saveProfile(profile) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(profile.toJSON())); } catch {}
-}
-
-// ================================================================
-// 5. LÓGICA DE LA BRÚJULA (pre-selección)
-// ================================================================
+// Presets para la brújula (intensidad: 0=nunca, 1=a veces, 2=a menudo, 3=siempre)
 const COMPASS_PRESETS = {
-  visual: ['visual_dom', 'abstracto', 'flash_asoc'],
-  verbal: ['auditivo_dom', 'verbal_dom', 'simulacion_soc'],
-  kinestesico: ['propioceptivo', 'descarga_motora', 'experienciacion'],
-  abstracto: ['rizomatico', 'meta_continua', 'anticipacion']
+  visual: { 'visual_dom': 3, 'abstracto': 2, 'flash_asoc': 2 },
+  verbal: { 'auditivo_dom': 3, 'verbal_dom': 2, 'simulacion_soc': 2 },
+  kinestesico: { 'propioceptivo': 3, 'descarga_motora': 2, 'experienciacion': 2 },
+  abstracto: { 'rizomatico': 3, 'meta_continua': 2, 'anticipacion': 2 }
 };
 
 // ================================================================
-// 6. UI: RENDERIZADO DE CHECKBOXES
+// 2. MODELO: Profile (inmutable)
+// ================================================================
+class Profile {
+  constructor(intensities = {}) {
+    this._intensities = { ...intensities }; // { nodeId: 0-3 }
+  }
+
+  // Obtener intensidad de un nodo (0 si no definido)
+  getIntensity(nodeId) {
+    return this._intensities[nodeId] || 0;
+  }
+
+  // Establecer intensidad de un nodo, devuelve nuevo Profile
+  setIntensity(nodeId, value) {
+    const newIntensities = { ...this._intensities };
+    if (value <= 0) {
+      delete newIntensities[nodeId];
+    } else {
+      newIntensities[nodeId] = value;
+    }
+    return new Profile(newIntensities);
+  }
+
+  // Obtener nodos activos con umbral (por defecto >=2, "a menudo" o "siempre")
+  getActiveNodes(threshold = 2) {
+    return Object.entries(this._intensities)
+      .filter(([id, val]) => val >= threshold)
+      .map(([id]) => id);
+  }
+
+  // Promedio de intensidad por capa
+  getAverageIntensityByLayer(layerId) {
+    const layer = LAYERS.find(l => l.id === layerId);
+    if (!layer) return 0;
+    const intensities = layer.nodes.map(n => this.getIntensity(n.id));
+    const sum = intensities.reduce((acc, val) => acc + val, 0);
+    return sum / intensities.length;
+  }
+
+  // Número de nodos con intensidad > 0
+  countNonZero(layerId = null) {
+    if (layerId) {
+      const layer = LAYERS.find(l => l.id === layerId);
+      return layer ? layer.nodes.filter(n => this.getIntensity(n.id) > 0).length : 0;
+    }
+    return Object.values(this._intensities).filter(v => v > 0).length;
+  }
+
+  // Índice de diversidad (0-1) basado en entropía de intensidades
+  getDiversityIndex(layerId = null) {
+    let intensities;
+    if (layerId) {
+      const layer = LAYERS.find(l => l.id === layerId);
+      if (!layer) return 0;
+      intensities = layer.nodes.map(n => this.getIntensity(n.id));
+    } else {
+      intensities = Object.values(this._intensities);
+      // Si no hay intensidades, diversidad 0
+      if (intensities.length === 0) return 0;
+    }
+
+    const total = intensities.reduce((acc, val) => acc + val, 0);
+    if (total === 0) return 0;
+
+    // Normalizar a probabilidades
+    const probs = intensities.map(v => v / total);
+    const entropy = -probs.reduce((acc, p) => acc + (p > 0 ? p * Math.log2(p) : 0), 0);
+    const maxEntropy = Math.log2(intensities.length || 1);
+    return entropy / maxEntropy;
+  }
+
+  // Serialización
+  toJSON() {
+    return this._intensities;
+  }
+
+  static fromJSON(data) {
+    return new Profile(data || {});
+  }
+
+  // Para debug
+  toString() {
+    return JSON.stringify(this._intensities);
+  }
+}
+
+// ================================================================
+// 3. STORE (gestión central del estado)
+// ================================================================
+const STORAGE_KEY = 'gpp_profile_v3';
+
+class Store {
+  constructor() {
+    this._profile = this._loadProfile();
+    this._listeners = new Set();
+  }
+
+  _loadProfile() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return Profile.fromJSON(raw ? JSON.parse(raw) : {});
+    } catch {
+      return new Profile();
+    }
+  }
+
+  _saveProfile() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this._profile.toJSON()));
+    } catch {}
+  }
+
+  getProfile() {
+    return this._profile;
+  }
+
+  setProfile(newProfile) {
+    this._profile = newProfile;
+    this._saveProfile();
+    this._notify();
+  }
+
+  setIntensity(nodeId, value) {
+    const newProfile = this._profile.setIntensity(nodeId, value);
+    this.setProfile(newProfile);
+  }
+
+  applyPreset(mode) {
+    const preset = COMPASS_PRESETS[mode];
+    if (!preset) return;
+    let newProfile = this._profile;
+    Object.entries(preset).forEach(([nodeId, intensity]) => {
+      newProfile = newProfile.setIntensity(nodeId, intensity);
+    });
+    this.setProfile(newProfile);
+  }
+
+  reset() {
+    this.setProfile(new Profile());
+  }
+
+  subscribe(listener) {
+    this._listeners.add(listener);
+    return () => this._listeners.delete(listener);
+  }
+
+  _notify() {
+    this._listeners.forEach(listener => {
+      try { listener(this._profile); } catch (e) { console.error(e); }
+    });
+  }
+}
+
+// ================================================================
+// 4. SERVICIOS DE RENDERIZADO
 // ================================================================
 const layersContainer = document.getElementById('layers-container');
+const narrativeBox = document.getElementById('narrative-box');
+const radarBox = document.getElementById('radar-box');
+const graphBox = document.getElementById('graph-box');
+const tooltip = document.getElementById('tooltip');
+const resultsDiv = document.getElementById('results');
 
-function renderCheckboxes(profile) {
+// --- 4.1 Renderizar opciones de capas (radios de intensidad) ---
+function renderLayerOptions(profile) {
   layersContainer.innerHTML = '';
   LAYERS.forEach(layer => {
     const card = document.createElement('div');
@@ -447,62 +572,98 @@ function renderCheckboxes(profile) {
     `;
     const body = card.querySelector('.layer-body');
     layer.nodes.forEach(node => {
-      const label = document.createElement('label');
-      label.className = 'node-option';
-      label.innerHTML = `
-        <input type="checkbox" value="${node.id}" ${profile.isActive(node.id) ? 'checked' : ''}>
-        <div>
-          <div class="node-label">${node.label}</div>
-          <div class="node-desc">${node.desc}</div>
+      const currentVal = profile.getIntensity(node.id);
+      const nodeDiv = document.createElement('div');
+      nodeDiv.className = 'node-option';
+      nodeDiv.innerHTML = `
+        <div class="node-label">${node.label}</div>
+        <div class="node-desc">${node.desc}</div>
+        <div class="intensity-scale" role="radiogroup" aria-label="Intensidad para ${node.label}">
+          ${[0,1,2,3].map(val => `
+            <label>
+              <input type="radio" name="intensity-${node.id}" value="${val}" ${currentVal === val ? 'checked' : ''}>
+              <span>${['Nunca','A veces','A menudo','Siempre'][val]}</span>
+            </label>
+          `).join('')}
         </div>
       `;
-      const input = label.querySelector('input');
-      input.addEventListener('change', () => {
-        const newProfile = profile.toggle(node.id);
-        saveProfile(newProfile);
-        bus.publish('PROFILE_CHANGED', newProfile);
-        // actualizar el estado interno de la vista para futuros toggles
-        profile = newProfile;
-        // sincronizar el resto de checkboxes (por si algún otro cambió)
-        syncCheckboxes(profile);
+      body.appendChild(nodeDiv);
+
+      // Event listener para cambios de intensidad
+      const radios = nodeDiv.querySelectorAll('input[type="radio"]');
+      radios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          const value = parseInt(radio.value, 10);
+          store.setIntensity(node.id, value);
+        });
       });
-      body.appendChild(label);
     });
     layersContainer.appendChild(card);
   });
 }
 
-function syncCheckboxes(profile) {
-  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-    cb.checked = profile.isActive(cb.value);
-  });
-}
-
-// ================================================================
-// 7. RENDERIZADORES
-// ================================================================
-
-// 7.1 Narrativa (texto en segunda persona)
-const narrativeBox = document.getElementById('narrative-box');
+// --- 4.2 Narrativa con análisis de dominancia y diversidad ---
 function renderNarrative(profile) {
-  if (profile.size === 0) {
+  if (profile.countNonZero() === 0) {
     narrativeBox.innerHTML = `<p style="color:#64748b; font-style:italic;">Marca al menos un nodo para ver tu perfil.</p>`;
     return;
   }
-  let html = `<p style="margin-bottom:1rem; color:#94a3b8;">Tu mapa tiene <strong>${profile.size}</strong> mecanismos activos.</p>`;
 
-  // Recorrer capas
+  let html = `<p style="margin-bottom:1rem; color:#94a3b8;">Tu mapa tiene <strong>${profile.countNonZero()}</strong> mecanismos con intensidad mayor a cero.</p>`;
+
+  // Resumen por capas
   LAYERS.forEach(layer => {
-    const active = layer.nodes.filter(n => profile.isActive(n.id));
-    if (active.length === 0) return;
-    html += `<h3 style="color:${layer.color}">${layer.label}</h3><p>`;
-    active.forEach(n => {
-      html += `<span class="tag" style="background:${layer.color}22; color:${layer.color}; border:1px solid ${layer.color}44;">${n.label}</span>`;
+    const activeCount = layer.nodes.filter(n => profile.getIntensity(n.id) > 0).length;
+    if (activeCount === 0) return;
+    const avg = profile.getAverageIntensityByLayer(layer.id).toFixed(1);
+    html += `<h3 style="color:${layer.color}">${layer.label} <span style="font-size:0.8rem; color:#94a3b8;">(intensidad media: ${avg}/3)</span></h3><p>`;
+    layer.nodes.forEach(n => {
+      const val = profile.getIntensity(n.id);
+      if (val > 0) {
+        html += `<span class="tag" style="background:${layer.color}22; color:${layer.color}; border:1px solid ${layer.color}44;">${n.label} · ${val}/3</span>`;
+      }
     });
     html += `</p>`;
   });
 
-  // Patrones (sugerencias en lenguaje natural)
+  // Mecanismos dominantes (intensidad >= 2)
+  const dominantNodes = [];
+  LAYERS.forEach(layer => {
+    layer.nodes.forEach(n => {
+      const val = profile.getIntensity(n.id);
+      if (val >= 2) dominantNodes.push({ ...n, layerColor: layer.color, intensity: val });
+    });
+  });
+  dominantNodes.sort((a, b) => b.intensity - a.intensity);
+
+  if (dominantNodes.length > 0) {
+    html += `<h3 style="color:#cbd5e1; margin-top:1.2rem;">🌟 Mecanismos dominantes</h3><ul class="dominance-list">`;
+    dominantNodes.slice(0, 8).forEach(n => {
+      html += `<li>
+        <span class="node-name" style="color:${n.layerColor}">${n.label}</span>
+        <span class="intensity-badge">${['','A veces','A menudo','Siempre'][n.intensity]}</span>
+      </li>`;
+    });
+    html += `</ul>`;
+  }
+
+  // Diversidad global y por capa
+  const globalDiv = profile.getDiversityIndex();
+  html += `<h3 style="color:#cbd5e1; margin-top:1.2rem;">🧩 Diversidad de tu perfil</h3>`;
+  html += `<p>Índice de diversidad global: <strong>${(globalDiv * 100).toFixed(0)}%</strong>.
+    ${globalDiv > 0.7 ? 'Tu perfil es muy diverso: usas muchos mecanismos diferentes de forma equilibrada.' :
+      globalDiv > 0.4 ? 'Tienes un perfil moderadamente diverso, con algunos mecanismos más destacados.' :
+      'Tu perfil es más focalizado: unos pocos mecanismos dominan claramente.'}</p>`;
+
+  // Diversidad por capa
+  LAYERS.forEach(layer => {
+    const div = profile.getDiversityIndex(layer.id);
+    if (div > 0) {
+      html += `<p style="font-size:0.9rem; color:#94a3b8;">- ${layer.label}: ${(div * 100).toFixed(0)}% de diversidad.</p>`;
+    }
+  });
+
+  // Patrones
   const patterns = detectPatterns(profile);
   if (patterns.length) {
     html += `<h3 style="color:#cbd5e1; margin-top:1.2rem;">🔍 Observaciones sobre tu mapa</h3>`;
@@ -514,9 +675,8 @@ function renderNarrative(profile) {
   narrativeBox.innerHTML = html;
 }
 
-// Detección de patrones con frases humanas
 function detectPatterns(profile) {
-  const has = id => profile.isActive(id);
+  const has = (id, threshold = 2) => profile.getIntensity(id) >= threshold;
   const patterns = [];
   if (has('analisis_post') && has('espontaneidad_ctx'))
     patterns.push('Actúas en el momento y reflexionas después. Como un jazzista que improvisa y luego analiza la partitura.');
@@ -532,41 +692,112 @@ function detectPatterns(profile) {
     patterns.push('Tu mente salta de idea en idea, pero luego necesitas un respiro. Eres un fuego artificial que necesita su pausa.');
   if (has('empatia_visceral') && has('interoceptivo'))
     patterns.push('Sientes las emociones de los demás en tu propio cuerpo. Tu empatía es física, no solo mental.');
+  // Nuevos patrones basados en diversidad
+  const globalDiv = profile.getDiversityIndex();
+  if (globalDiv > 0.75)
+    patterns.push('Tienes una flexibilidad cognitiva alta: puedes adaptarte a distintas formas de procesar según la situación.');
+  if (globalDiv < 0.35)
+    patterns.push('Tienes un estilo de procesamiento muy definido y consistente. Sabes lo que te funciona.');
   return patterns;
 }
 
-// 7.2 Mapa de calor (barras horizontales)
-const heatmapBox = document.getElementById('heatmap-box');
-function renderHeatmap(profile) {
-  let html = `<div class="heatmap-bars">`;
-  LAYERS.forEach(layer => {
-    const active = layer.nodes.filter(n => profile.isActive(n.id)).length;
-    const total = layer.nodes.length;
-    const percent = total ? (active / total) * 100 : 0;
-    html += `
-      <div class="hbar">
-        <div class="hbar-label" style="color:${layer.color}">${layer.label}</div>
-        <div class="hbar-track">
-          <div class="hbar-fill" style="width:${percent}%; background:${layer.color};"></div>
-        </div>
-        <div class="hbar-percent">${Math.round(percent)}%</div>
-      </div>
-    `;
+// --- 4.3 Radar (gráfico de araña con SVG) ---
+function renderRadar(profile) {
+  const size = 400;
+  const cx = size / 2, cy = size / 2;
+  const radius = 160;
+  const levels = 3; // número de anillos (para intensidad 0-3)
+  const angleStep = (2 * Math.PI) / LAYERS.length;
+  const startAngle = -Math.PI / 2;
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+  svg.setAttribute('width', size);
+  svg.setAttribute('height', size);
+  svg.style.maxWidth = '100%';
+
+  // Anillos
+  for (let level = 1; level <= levels; level++) {
+    const r = (radius / levels) * level;
+    const circle = document.createElementNS(ns, 'circle');
+    circle.setAttribute('cx', cx); circle.setAttribute('cy', cy); circle.setAttribute('r', r);
+    circle.setAttribute('fill', 'none');
+    circle.setAttribute('stroke', '#1e2937');
+    circle.setAttribute('stroke-width', '1');
+    svg.appendChild(circle);
+  }
+
+  // Ejes y etiquetas
+  const points = {};
+  LAYERS.forEach((layer, i) => {
+    const angle = startAngle + i * angleStep;
+    const x = cx + radius * Math.cos(angle);
+    const y = cy + radius * Math.sin(angle);
+    points[layer.id] = { x, y, angle };
+
+    // Eje
+    const line = document.createElementNS(ns, 'line');
+    line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+    line.setAttribute('x2', x); line.setAttribute('y2', y);
+    line.setAttribute('stroke', '#334155');
+    line.setAttribute('stroke-width', '1');
+    svg.appendChild(line);
+
+    // Etiqueta de capa
+    const labelX = cx + (radius + 30) * Math.cos(angle);
+    const labelY = cy + (radius + 30) * Math.sin(angle);
+    const text = document.createElementNS(ns, 'text');
+    text.setAttribute('x', labelX); text.setAttribute('y', labelY);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'middle');
+    text.setAttribute('fill', layer.hex);
+    text.setAttribute('font-size', '12');
+    text.setAttribute('font-weight', 'bold');
+    text.textContent = layer.label.split(' ')[0]; // Solo primera palabra
+    svg.appendChild(text);
   });
-  html += `</div>`;
-  heatmapBox.innerHTML = html;
+
+  // Polígono de datos
+  const dataPoints = LAYERS.map(layer => {
+    const avg = profile.getAverageIntensityByLayer(layer.id);
+    const r = (avg / 3) * radius;
+    const angle = startAngle + LAYERS.findIndex(l => l.id === layer.id) * angleStep;
+    return {
+      x: cx + r * Math.cos(angle),
+      y: cy + r * Math.sin(angle),
+      avg
+    };
+  });
+
+  const polygon = document.createElementNS(ns, 'polygon');
+  polygon.setAttribute('points', dataPoints.map(p => `${p.x},${p.y}`).join(' '));
+  polygon.setAttribute('fill', 'rgba(96,165,250,0.3)');
+  polygon.setAttribute('stroke', '#60a5fa');
+  polygon.setAttribute('stroke-width', '2');
+  svg.appendChild(polygon);
+
+  // Puntos en cada vértice
+  dataPoints.forEach((p, i) => {
+    const circle = document.createElementNS(ns, 'circle');
+    circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+    circle.setAttribute('r', 5);
+    circle.setAttribute('fill', LAYERS[i].hex);
+    circle.setAttribute('stroke', '#fff');
+    circle.setAttribute('stroke-width', '1');
+    svg.appendChild(circle);
+  });
+
+  radarBox.innerHTML = '';
+  radarBox.appendChild(svg);
 }
 
-// 7.3 Grafo (SVG con anillos concéntricos mejorados)
-const graphBox = document.getElementById('graph-box');
-const tooltip = document.getElementById('tooltip');
-
+// --- 4.4 Grafo (SVG con anillos concéntricos) ---
 function renderGraph(profile) {
   const size = 800;
   const cx = size / 2, cy = size / 2;
   const radii = { ingesta: 100, procesamiento: 190, analisis: 280, accion: 370, sistemica: 460 };
 
-  // Posicionar nodos
   const positions = {};
   LAYERS.forEach(layer => {
     const r = radii[layer.id];
@@ -600,11 +831,11 @@ function renderGraph(profile) {
     svg.appendChild(circle);
   });
 
-  // Aristas teóricas (siempre dibujadas, se iluminan si ambos activos)
+  // Aristas teóricas
   EDGES.forEach(edge => {
     const a = positions[edge.from], b = positions[edge.to];
     if (!a || !b) return;
-    const active = profile.isActive(edge.from) && profile.isActive(edge.to);
+    const active = profile.getIntensity(edge.from) >= 2 && profile.getIntensity(edge.to) >= 2;
     const line = document.createElementNS(ns, 'line');
     line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
     line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
@@ -615,13 +846,13 @@ function renderGraph(profile) {
     svg.appendChild(line);
   });
 
-  // Aristas de flujo entre capas adyacentes (solo si ambos activos)
+  // Aristas de flujo entre capas adyacentes
   for (let i = 0; i < LAYERS.length - 1; i++) {
     const curr = LAYERS[i], next = LAYERS[i+1];
     curr.nodes.forEach(na => {
-      if (!profile.isActive(na.id)) return;
+      if (profile.getIntensity(na.id) < 2) return;
       next.nodes.forEach(nb => {
-        if (!profile.isActive(nb.id)) return;
+        if (profile.getIntensity(nb.id) < 2) return;
         const a = positions[na.id], b = positions[nb.id];
         if (!a || !b) return;
         const line = document.createElementNS(ns, 'line');
@@ -638,18 +869,19 @@ function renderGraph(profile) {
 
   // Nodos
   Object.entries(positions).forEach(([id, pos]) => {
-    const active = profile.isActive(id);
+    const intensity = profile.getIntensity(id);
+    const active = intensity >= 2;
     const g = document.createElementNS(ns, 'g');
     g.style.cursor = 'pointer';
 
     const circle = document.createElementNS(ns, 'circle');
     circle.setAttribute('cx', pos.x); circle.setAttribute('cy', pos.y);
-    circle.setAttribute('r', active ? 10 : 6);
-    circle.setAttribute('fill', active ? pos.color : '#1e2937');
-    circle.setAttribute('stroke', active ? '#fff' : '#334155');
-    circle.setAttribute('stroke-width', active ? 2 : 1);
+    circle.setAttribute('r', 6 + intensity * 1.5);
+    circle.setAttribute('fill', intensity > 0 ? pos.color : '#1e2937');
+    circle.setAttribute('stroke', intensity > 0 ? '#fff' : '#334155');
+    circle.setAttribute('stroke-width', intensity > 0 ? 2 : 1);
     circle.setAttribute('class', 'node-circle');
-    if (active) circle.style.filter = `drop-shadow(0 0 8px ${pos.color})`;
+    if (intensity > 0) circle.style.filter = `drop-shadow(0 0 ${intensity * 3}px ${pos.color})`;
 
     const text = document.createElementNS(ns, 'text');
     text.setAttribute('x', pos.x); text.setAttribute('y', pos.y + 22);
@@ -661,7 +893,7 @@ function renderGraph(profile) {
 
     // Tooltip
     g.addEventListener('mouseenter', (e) => {
-      tooltip.innerHTML = `<strong>${pos.label}</strong> ${active ? '✅ activo' : ''}<br><span style="color:#94a3b8; font-size:0.8rem;">${pos.desc}</span>`;
+      tooltip.innerHTML = `<strong>${pos.label}</strong> · Intensidad: ${intensity}/3<br><span style="color:#94a3b8; font-size:0.8rem;">${pos.desc}</span>`;
       tooltip.style.opacity = 1;
       tooltip.style.left = (e.pageX + 12) + 'px';
       tooltip.style.top = (e.pageY + 12) + 'px';
@@ -680,68 +912,83 @@ function renderGraph(profile) {
 }
 
 // ================================================================
-// 8. ACTUALIZACIÓN GLOBAL (cuando cambia el perfil)
+// 5. EXPORTACIÓN
 // ================================================================
-function updateAll(profile) {
-  renderNarrative(profile);
-  renderHeatmap(profile);
-  renderGraph(profile);
-  // Sincronizar checkboxes (por si hubo cambios externos)
-  syncCheckboxes(profile);
+function exportProfile(profile) {
+  const data = JSON.stringify(profile.toJSON(), null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'perfil_gpp.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function copyProfileLink(profile) {
+  const data = JSON.stringify(profile.toJSON());
+  const encoded = btoa(encodeURIComponent(data));
+  const url = `${window.location.origin}${window.location.pathname}?profile=${encoded}`;
+  navigator.clipboard.writeText(url).then(() => {
+    alert('Enlace copiado al portapapeles.');
+  });
 }
 
 // ================================================================
-// 9. INICIO Y SUSCRIPCIONES
+// 6. INICIALIZACIÓN Y SUSCRIPCIONES
 // ================================================================
 
-// Cargar perfil inicial
-let currentProfile = loadProfile();
+// Crear Store
+const store = new Store();
 
-// Renderizar checkboxes
-renderCheckboxes(currentProfile);
+// Render inicial de capas
+renderLayerOptions(store.getProfile());
 
-// Suscribirse a cambios
-bus.subscribe('PROFILE_CHANGED', (newProfile) => {
-  currentProfile = newProfile;
-  updateAll(currentProfile);
-  // Guardar ya se hizo en el evento del checkbox
+// Suscribir a cambios del store
+store.subscribe((profile) => {
+  renderNarrative(profile);
+  renderRadar(profile);
+  renderGraph(profile);
+  // Actualizar radios si es necesario (por cambios desde brújula)
+  // Para simplificar, re-renderizamos solo las opciones de capas si el cambio no vino de radios.
+  // Pero para evitar bucles, lo hacemos solo si no se está renderizando actualmente.
+  // Mejor: usamos un flag para evitar re-renderizar capas innecesariamente.
+  // En este caso, los radios ya se actualizan directamente en el DOM al cambiar.
+  // Si el cambio viene de la brújula, necesitamos actualizar los radios.
+  // Para ello, suscribimos un listener que solo actualiza los radios si no fueron ellos el origen.
+  // Simplificamos: re-renderizamos capas cada vez que cambia el perfil desde la brújula o reset.
+  // Eso lo haremos desde los botones.
 });
 
-// Render inicial
-updateAll(currentProfile);
+// Render inicial de visualizaciones (aunque results está oculto)
+renderNarrative(store.getProfile());
+renderRadar(store.getProfile());
+renderGraph(store.getProfile());
 
 // ================================================================
-// 10. BRÚJULA (pre-selección)
+// 7. BRÚJULA
 // ================================================================
 const compassBtns = document.querySelectorAll('.compass-btn');
 compassBtns.forEach(btn => {
   btn.addEventListener('click', () => {
     const mode = btn.dataset.mode;
-    const ids = COMPASS_PRESETS[mode] || [];
-    if (!ids.length) return;
-    // Añadir esos nodos al perfil actual (sin perder los que ya tenía)
-    let newProfile = currentProfile;
-    ids.forEach(id => {
-      if (!newProfile.isActive(id)) {
-        newProfile = newProfile.toggle(id);
-      }
+    store.applyPreset(mode);
+    // Re-renderizar capas para reflejar nuevas intensidades
+    renderLayerOptions(store.getProfile());
+    // Marcar botón seleccionado
+    compassBtns.forEach(b => {
+      b.classList.remove('selected');
+      b.setAttribute('aria-pressed', 'false');
     });
-    // Guardar y publicar
-    saveProfile(newProfile);
-    bus.publish('PROFILE_CHANGED', newProfile);
-    // Marcar botón como seleccionado (feedback visual)
-    compassBtns.forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
-    // Opcional: ocultar brújula después de elegir
-    // document.getElementById('compass').style.display = 'none';
+    btn.setAttribute('aria-pressed', 'true');
   });
 });
 
 // ================================================================
-// 11. BOTONES DE ACCIÓN
+// 8. BOTONES DE ACCIÓN
 // ================================================================
 const btnGenerate = document.getElementById('btn-generate');
-const resultsDiv = document.getElementById('results');
 btnGenerate.addEventListener('click', () => {
   resultsDiv.style.display = 'block';
   resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -749,30 +996,42 @@ btnGenerate.addEventListener('click', () => {
 
 const btnReset = document.getElementById('btn-reset');
 btnReset.addEventListener('click', () => {
-  const empty = new Profile();
-  saveProfile(empty);
-  bus.publish('PROFILE_CHANGED', empty);
+  store.reset();
+  renderLayerOptions(store.getProfile());
   resultsDiv.style.display = 'none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  // Desmarcar brújula
-  compassBtns.forEach(b => b.classList.remove('selected'));
+  compassBtns.forEach(b => {
+    b.classList.remove('selected');
+    b.setAttribute('aria-pressed', 'false');
+  });
+});
+
+const btnExport = document.getElementById('btn-export');
+btnExport.addEventListener('click', () => {
+  exportProfile(store.getProfile());
 });
 
 // ================================================================
-// 12. TABS
+// 9. TABS
 // ================================================================
 const tabs = document.querySelectorAll('.tab');
 const vizzes = document.querySelectorAll('.viz');
 tabs.forEach(tab => {
   tab.addEventListener('click', () => {
     const id = tab.dataset.viz;
-    tabs.forEach(t => t.classList.toggle('active', t.dataset.viz === id));
-    vizzes.forEach(v => v.classList.toggle('active', v.id === 'viz-' + id));
+    tabs.forEach(t => {
+      const isActive = t.dataset.viz === id;
+      t.classList.toggle('active', isActive);
+      t.setAttribute('aria-selected', isActive);
+    });
+    vizzes.forEach(v => {
+      v.classList.toggle('active', v.id === 'viz-' + id);
+    });
   });
 });
 
 // ================================================================
-// 13. TOOLTIP GLOBAL (se mueve con el ratón)
+// 10. TOOLTIP GLOBAL
 // ================================================================
 document.addEventListener('mousemove', (e) => {
   if (tooltip.style.opacity === '1') {
@@ -781,7 +1040,7 @@ document.addEventListener('mousemove', (e) => {
   }
 });
 
-console.log('🧭 Mapa de Percepción Personal v2.0 cargado.');
+console.log('🧭 Mapa de Percepción Personal v3.0 cargado.');
 </script>
 </body>
 </html>
